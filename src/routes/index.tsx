@@ -205,7 +205,7 @@ function RouteComponent() {
 					<fieldset className="fieldset w-full sm:w-auto">
 						{/* select 側の legend と高さを揃えるためのダミーラベル（モバイルでは非表示） */}
 						<legend className="fieldset-legend invisible hidden sm:block">
-							回答
+							解答する
 						</legend>
 						<button
 							type="button"
@@ -215,7 +215,7 @@ function RouteComponent() {
 								isGameOver || !selectedParams.identityId || !correctIdentity
 							}
 						>
-							回答
+							解答する
 						</button>
 					</fieldset>
 				</div>
