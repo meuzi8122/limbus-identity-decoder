@@ -1,4 +1,4 @@
-import type { Identity } from "../../domains/entities/Identity";
+import type { Identity } from "../../domains/entities/identity";
 
 export interface IdentityRepository {
 	getAll: () => Promise<Identity[]>;

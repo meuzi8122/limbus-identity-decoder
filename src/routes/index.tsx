@@ -5,7 +5,7 @@ import {
 	type Identity,
 	type SkillHint,
 	selectCorrectIdentity,
-} from "#/domains/entities/Identity";
+} from "#/domains/entities/identity";
 import { getIdentities } from "#/server/identity/get-all-identities";
 
 export const Route = createFileRoute("/")({

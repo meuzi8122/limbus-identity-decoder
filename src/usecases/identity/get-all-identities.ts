@@ -1,4 +1,4 @@
-import type { Identity } from "../../domains/entities/Identity";
+import type { Identity } from "../../domains/entities/identity";
 import type { IdentityRepository } from "../../domains/repository-interfaces/identity-repository";
 
 export async function getAllIdentities(deps: {

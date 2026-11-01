@@ -49,8 +49,20 @@ export function checkSkills(params: {
 }): [SkillHint, SkillHint, SkillHint] {
 	const { selectedIdentity, correctIdentity, currentHints } = params;
 	return [
-		matchSkill(selectedIdentity.skills[0], correctIdentity.skills[0], currentHints[0]),
-		matchSkill(selectedIdentity.skills[1], correctIdentity.skills[1], currentHints[1]),
-		matchSkill(selectedIdentity.skills[2], correctIdentity.skills[2], currentHints[2]),
+		matchSkill(
+			selectedIdentity.skills[0],
+			correctIdentity.skills[0],
+			currentHints[0],
+		),
+		matchSkill(
+			selectedIdentity.skills[1],
+			correctIdentity.skills[1],
+			currentHints[1],
+		),
+		matchSkill(
+			selectedIdentity.skills[2],
+			correctIdentity.skills[2],
+			currentHints[2],
+		),
 	];
 }
