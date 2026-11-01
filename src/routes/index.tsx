@@ -152,66 +152,91 @@ function RouteComponent() {
 	};
 
 	return (
-		<div className="container mx-auto p-4 flex flex-col gap-4">
-			<p>{`${isGameOver ? `正解: ${correctIdentity?.name}` : `残り回答回数: ${count}`}`}</p>
+		<div className="container mx-auto flex flex-col space-y-3 items-center p-5">
+			<p className="text-lg font-bold">{`${isGameOver ? `正解: ${correctIdentity?.name}` : `残り回答回数: ${count}`}`}</p>
 			{isGameOver ? (
 				<button type="button" className="btn btn-primary" onClick={reset}>
 					もう一度プレイ
 				</button>
 			) : (
-				<div className="flex gap-2">
-					<select
-						value={currentCharacter}
-						onChange={(e) =>
-							setSelectedParams({ character: e.target.value, identityId: null })
-						}
-					>
-						{availableCharacters.map((character) => (
-							<option key={character} value={character}>
-								{character}
+				<div className="flex flex-col sm:flex-row gap-2 sm:justify-center sm:items-end w-full max-w-lg lg:max-w-4xl xl:max-w-6xl">
+					<fieldset className="fieldset w-full sm:w-auto">
+						<legend className="fieldset-legend">囚人</legend>
+						<select
+							className="select w-full sm:w-48"
+							value={currentCharacter}
+							onChange={(e) =>
+								setSelectedParams({
+									character: e.target.value,
+									identityId: null,
+								})
+							}
+						>
+							{availableCharacters.map((character) => (
+								<option key={character} value={character}>
+									{character}
+								</option>
+							))}
+						</select>
+					</fieldset>
+					<fieldset className="fieldset w-full sm:flex-1">
+						<legend className="fieldset-legend">人格</legend>
+						<select
+							className="select w-full"
+							value={selectedParams.identityId || ""}
+							defaultValue={filteredIdentities[0]?.id || ""}
+							onChange={(e) =>
+								setSelectedParams({
+									...selectedParams,
+									identityId: e.target.value,
+								})
+							}
+						>
+							<option value="" disabled>
+								選択されていません
 							</option>
-						))}
-					</select>
-					<select
-						value={selectedParams.identityId || ""}
-						defaultValue={filteredIdentities[0]?.id || ""}
-						onChange={(e) =>
-							setSelectedParams({
-								...selectedParams,
-								identityId: e.target.value,
-							})
-						}
-					>
-						<option value="" disabled>
-							選択されていません
-						</option>
-						{filteredIdentities.map((identity) => (
-							<option key={identity.id} value={identity.id}>
-								{identity.name.replace(currentCharacter, "")}
-							</option>
-						))}
-					</select>
-					<button
-						type="button"
-						className="btn btn-primary"
-						onClick={handleSubmit}
-						disabled={
-							isGameOver || !selectedParams.identityId || !correctIdentity
-						}
-					>
-						回答
-					</button>
+							{filteredIdentities.map((identity) => (
+								<option key={identity.id} value={identity.id}>
+									{identity.name.replace(currentCharacter, "")}
+								</option>
+							))}
+						</select>
+					</fieldset>
+					<fieldset className="fieldset w-full sm:w-auto">
+						{/* select 側の legend と高さを揃えるためのダミーラベル（モバイルでは非表示） */}
+						<legend className="fieldset-legend invisible hidden sm:block">
+							回答
+						</legend>
+						<button
+							type="button"
+							className="btn btn-primary w-full"
+							onClick={handleSubmit}
+							disabled={
+								isGameOver || !selectedParams.identityId || !correctIdentity
+							}
+						>
+							回答
+						</button>
+					</fieldset>
 				</div>
 			)}
 			{correctIdentity && (
-				<div className="overflow-x-auto">
-					<table className="table">
+				<div className="overflow-x-auto w-full max-w-lg lg:max-w-4xl xl:max-w-6xl">
+					<table className="table table-fixed w-full">
 						<thead>
 							<tr>
-								<th scope="col">スキル名</th>
-								<th scope="col">罪悪属性</th>
-								<th scope="col">物理属性</th>
-								<th scope="col">コイン枚数</th>
+								<th scope="col" className="w-2/5">
+									スキル名
+								</th>
+								<th scope="col" className="w-1/5">
+									罪悪属性
+								</th>
+								<th scope="col" className="w-1/5">
+									物理属性
+								</th>
+								<th scope="col" className="w-1/5">
+									コイン枚数
+								</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -243,16 +268,16 @@ function RouteComponent() {
 					</table>
 				</div>
 			)}
-			<div>
-				<p>回答履歴</p>
-				<div className="flex gap-2">
+			<div className="mt-5 w-full max-w-lg lg:max-w-4xl xl:max-w-6xl text-left">
+				<p>{guessedIds.length === 0 ? `解答履歴がありません` : `解答履歴`}</p>
+				<ul className="list-disc list-inside gap-1 mt-1">
 					{guessedIds.map((id) => {
 						const guessedIdentity = identities.find(
 							(identity) => identity.id === id,
 						);
-						return <span key={id}>{guessedIdentity?.name}</span>;
+						return <li key={id}>{guessedIdentity?.name}</li>;
 					})}
-				</div>
+				</ul>
 			</div>
 		</div>
 	);
