@@ -2,9 +2,12 @@ import { Link } from "@tanstack/react-router";
 
 export function Navbar() {
 	return (
-		<div className="navbar bg-base-100 shadow-sm mb-2">
+		<div className="navbar bg-neutral text-neutral-content">
 			<div className="flex-1">
-				<Link to="/" className="btn btn-ghost text-xl">
+				<Link
+					to="/"
+					className="px-2 text-xl font-bold text-neutral-content"
+				>
 					Limbus Identity Decoder
 				</Link>
 			</div>
@@ -15,7 +18,7 @@ export function Navbar() {
 						tabIndex={0}
 						className="btn btn-ghost btn-circle"
 					>
-						{/** biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+						{/* biome-ignore lint/a11y/noSvgWithoutTitle: 装飾用のハンバーガーアイコンのため title 不要 */}
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -33,7 +36,7 @@ export function Navbar() {
 					</button>
 					<ul
 						tabIndex={-1}
-						className="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+						className="menu dropdown-content bg-neutral text-neutral-content rounded-box z-10 mt-3 w-52 p-2 shadow-lg border border-neutral-content/20"
 					>
 						<li>
 							<Link to="/">クイズをプレイ</Link>
