@@ -23,6 +23,20 @@ const INITIAL_HINTS: [SkillHint, SkillHint, SkillHint] = [
 	{ type: null, sinType: null, coins: null },
 	{ type: null, sinType: null, coins: null },
 ];
+const CHARACTERS = [
+	"イサン",
+	"ファウスト",
+	"ドンキホーテ",
+	"良秀",
+	"ムルソー",
+	"ホンル",
+	"ヒースクリフ",
+	"イシュメール",
+	"ロージャ",
+	"シンクレア",
+	"ウーティス",
+	"グレゴール",
+];
 
 function RouteComponent() {
 	const { identities } = Route.useLoaderData();
@@ -30,37 +44,38 @@ function RouteComponent() {
 	const [hints, setHints] =
 		useState<[SkillHint, SkillHint, SkillHint]>(INITIAL_HINTS);
 
-	const [keyword, setKeyword] = useState("");
+	const [selectedParams, setSelectedParams] = useState<{
+		character: string;
+		identityId: string | null;
+	}>({
+		character: CHARACTERS[0],
+		identityId: null,
+	});
+	const selectedIdentity = useMemo(
+		() =>
+			identities.find((identity) => identity.id === selectedParams.identityId),
+		[identities, selectedParams.identityId],
+	);
 
 	const filteredIdentities = useMemo(() => {
-		const lowerCaseKeyword = keyword.toLowerCase();
 		return identities.filter((identity) => {
 			// 確定済みヒント（非null）と矛盾しない候補だけ残す（未確定の属性は制約にしない）
-			const matchesHints = identity.skills.every((skill, index) => {
-				const hint = hints[index];
-				return (
-					(hint.type === null || skill.type === hint.type) &&
-					(hint.sinType === null || skill.sinType === hint.sinType) &&
-					(hint.coins === null || skill.coins === hint.coins)
-				);
-			});
-			const matchesKeyword = identity.name
-				.toLowerCase()
-				.includes(lowerCaseKeyword);
-			return matchesHints && matchesKeyword;
+			return (
+				identity.name.endsWith(selectedParams.character) &&
+				identity.skills.every((skill, index) => {
+					const hint = hints[index];
+					return (
+						(hint.type === null || skill.type === hint.type) &&
+						(hint.sinType === null || skill.sinType === hint.sinType) &&
+						(hint.coins === null || skill.coins === hint.coins)
+					);
+				})
+			);
 		});
-	}, [identities, hints, keyword]);
+	}, [identities, hints, selectedParams.character]);
 
 	const [correctIdentity, _] = useState<Identity | null>(
 		selectCorrectIdentity(identities),
-	);
-
-	const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(
-		null,
-	);
-	const selectedIdentity = useMemo(
-		() => identities.find((identity) => identity.id === selectedIdentityId),
-		[identities, selectedIdentityId],
 	);
 
 	const handleSubmit = () => {
@@ -76,32 +91,50 @@ function RouteComponent() {
 
 	return (
 		<div>
-			<input
-				type="text"
-				placeholder="スキル名を入力"
-				value={keyword}
-				onChange={(e) => setKeyword(e.target.value)}
-			/>
-			<div className="flex flex-wrap gap-2">
-				{filteredIdentities.map((identity) => (
-					<div key={identity.id}>
-						<input
-							type="radio"
-							name="identity"
-							value={identity.id}
-							onChange={() => setSelectedIdentityId(identity.id)}
-						/>
-						<label htmlFor={identity.id}>{identity.name}</label>
-					</div>
-				))}
+			<div className="flex gap-2">
+				<select
+					value={selectedParams.character}
+					onChange={(e) =>
+						setSelectedParams({ character: e.target.value, identityId: null })
+					}
+				>
+					{CHARACTERS.map((character, index) => (
+						<option
+							key={`character-${
+								// biome-ignore lint/suspicious/noArrayIndexKey: 再計算が発生しないのでindexでok
+								index
+							}`}
+							value={character}
+						>
+							{character}
+						</option>
+					))}
+				</select>
+				<select
+					value={selectedParams.identityId || ""}
+					defaultValue={filteredIdentities[0]?.id || ""}
+					onChange={(e) =>
+						setSelectedParams({ ...selectedParams, identityId: e.target.value })
+					}
+				>
+					<option value="" disabled>
+						選択されていません
+					</option>
+					{filteredIdentities.map((identity) => (
+						<option key={identity.id} value={identity.id}>
+							{identity.name.replace(selectedParams.character, "")}
+						</option>
+					))}
+				</select>
+				<button
+					type="button"
+					className="btn btn-primary"
+					onClick={handleSubmit}
+					disabled={!selectedParams.identityId || !correctIdentity}
+				>
+					回答
+				</button>
 			</div>
-			<button
-				type="button"
-				onClick={handleSubmit}
-				disabled={!selectedIdentityId}
-			>
-				回答
-			</button>
 			<table>
 				<thead>
 					<tr>
