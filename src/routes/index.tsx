@@ -63,7 +63,7 @@ function RouteComponent() {
 	const [hints, setHints] =
 		useState<[SkillHint, SkillHint, SkillHint]>(INITIAL_HINTS);
 
-	// すでに回答した Identity は候補から除外する（同じ個体を無駄に選び直せないようにする）
+	// 既に解答した人格を除外
 	const [guessedIds, setGuessedIds] = useState<string[]>([]);
 
 	const [selectedParams, setSelectedParams] = useState<{
@@ -79,7 +79,7 @@ function RouteComponent() {
 		[identities, selectedParams.identityId],
 	);
 
-	// 現在のヒント・回答履歴のもとで、まだ候補が残っているキャラだけを選べるようにする
+	// 現在のヒント・回答履歴のもとで、まだ候補が残っている囚人だけを選べるようにする
 	const availableCharacters = useMemo(() => {
 		return CHARACTERS.filter((character) =>
 			identities.some(
@@ -90,7 +90,7 @@ function RouteComponent() {
 		);
 	}, [identities, hints, guessedIds]);
 
-	// 選択中キャラが候補ゼロになって選択肢から消えた場合は、先頭の有効キャラにフォールバックする
+	// 選択中キャラが候補ゼロになって選択肢から消えた場合は、選択可能な先頭の囚人にフォールバックする
 	const currentCharacter = availableCharacters.includes(
 		selectedParams.character,
 	)
@@ -142,7 +142,6 @@ function RouteComponent() {
 			return;
 		}
 
-		// 回答した個体は候補から消えるので、選択状態もリセットする
 		setSelectedParams((prev) => ({ ...prev, identityId: null }));
 
 		const nextCount = count - 1;
