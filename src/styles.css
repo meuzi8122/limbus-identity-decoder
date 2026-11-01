@@ -1,17 +1,7 @@
 
 @import "tailwindcss";
+@plugin "daisyui";
 
-* {
-  box-sizing: border-box;
+@plugin "daisyui" {
+  themes: halloween --default;
 }
-
-html,
-body,
-#app {
-  min-height: 100%;
-}
-
-body {
-  margin: 0;
-}
-
