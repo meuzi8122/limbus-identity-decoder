@@ -38,6 +38,25 @@ const CHARACTERS = [
 	"グレゴール",
 ];
 
+// キャラ名以外の条件（未回答 かつ 確定済みヒントと矛盾しない）で候補になり得るか判定する
+function isCandidate(
+	identity: Identity,
+	hints: [SkillHint, SkillHint, SkillHint],
+	guessedIds: string[],
+): boolean {
+	return (
+		!guessedIds.includes(identity.id) &&
+		identity.skills.every((skill, index) => {
+			const hint = hints[index];
+			return (
+				(hint.type === null || skill.type === hint.type) &&
+				(hint.sinType === null || skill.sinType === hint.sinType) &&
+				(hint.coins === null || skill.coins === hint.coins)
+			);
+		})
+	);
+}
+
 function RouteComponent() {
 	const { identities } = Route.useLoaderData();
 
@@ -60,23 +79,31 @@ function RouteComponent() {
 		[identities, selectedParams.identityId],
 	);
 
+	// 現在のヒント・回答履歴のもとで、まだ候補が残っているキャラだけを選べるようにする
+	const availableCharacters = useMemo(() => {
+		return CHARACTERS.filter((character) =>
+			identities.some(
+				(identity) =>
+					identity.name.endsWith(character) &&
+					isCandidate(identity, hints, guessedIds),
+			),
+		);
+	}, [identities, hints, guessedIds]);
+
+	// 選択中キャラが候補ゼロになって選択肢から消えた場合は、先頭の有効キャラにフォールバックする
+	const currentCharacter = availableCharacters.includes(
+		selectedParams.character,
+	)
+		? selectedParams.character
+		: (availableCharacters[0] ?? "");
+
 	const filteredIdentities = useMemo(() => {
-		return identities.filter((identity) => {
-			// 確定済みヒント（非null）と矛盾しない候補だけ残す（未確定の属性は制約にしない）
-			return (
-				!guessedIds.includes(identity.id) &&
-				identity.name.endsWith(selectedParams.character) &&
-				identity.skills.every((skill, index) => {
-					const hint = hints[index];
-					return (
-						(hint.type === null || skill.type === hint.type) &&
-						(hint.sinType === null || skill.sinType === hint.sinType) &&
-						(hint.coins === null || skill.coins === hint.coins)
-					);
-				})
-			);
-		});
-	}, [identities, hints, guessedIds, selectedParams.character]);
+		return identities.filter(
+			(identity) =>
+				identity.name.endsWith(currentCharacter) &&
+				isCandidate(identity, hints, guessedIds),
+		);
+	}, [identities, hints, guessedIds, currentCharacter]);
 
 	const [correctIdentity, setCorrectIdentity] = useState<Identity | null>(
 		selectCorrectIdentity(identities),
@@ -128,46 +155,43 @@ function RouteComponent() {
 	return (
 		<div className="container mx-auto p-4 flex flex-col gap-4">
 			<p>{`${isGameOver ? `正解: ${correctIdentity?.name}` : `残り回答回数: ${count}`}`}</p>
-			<div className="flex gap-2">
-				<select
-					value={selectedParams.character}
-					onChange={(e) =>
-						setSelectedParams({ character: e.target.value, identityId: null })
-					}
-				>
-					{CHARACTERS.map((character, index) => (
-						<option
-							key={`character-${
-								// biome-ignore lint/suspicious/noArrayIndexKey: 再計算が発生しないのでindexでok
-								index
-							}`}
-							value={character}
-						>
-							{character}
+			{isGameOver ? (
+				<button type="button" className="btn btn-primary" onClick={reset}>
+					もう一度プレイ
+				</button>
+			) : (
+				<div className="flex gap-2">
+					<select
+						value={currentCharacter}
+						onChange={(e) =>
+							setSelectedParams({ character: e.target.value, identityId: null })
+						}
+					>
+						{availableCharacters.map((character) => (
+							<option key={character} value={character}>
+								{character}
+							</option>
+						))}
+					</select>
+					<select
+						value={selectedParams.identityId || ""}
+						defaultValue={filteredIdentities[0]?.id || ""}
+						onChange={(e) =>
+							setSelectedParams({
+								...selectedParams,
+								identityId: e.target.value,
+							})
+						}
+					>
+						<option value="" disabled>
+							選択されていません
 						</option>
-					))}
-				</select>
-				<select
-					value={selectedParams.identityId || ""}
-					defaultValue={filteredIdentities[0]?.id || ""}
-					onChange={(e) =>
-						setSelectedParams({ ...selectedParams, identityId: e.target.value })
-					}
-				>
-					<option value="" disabled>
-						選択されていません
-					</option>
-					{filteredIdentities.map((identity) => (
-						<option key={identity.id} value={identity.id}>
-							{identity.name.replace(selectedParams.character, "")}
-						</option>
-					))}
-				</select>
-				{isGameOver ? (
-					<button type="button" className="btn btn-primary" onClick={reset}>
-						もう一度プレイ
-					</button>
-				) : (
+						{filteredIdentities.map((identity) => (
+							<option key={identity.id} value={identity.id}>
+								{identity.name.replace(currentCharacter, "")}
+							</option>
+						))}
+					</select>
 					<button
 						type="button"
 						className="btn btn-primary"
@@ -178,8 +202,8 @@ function RouteComponent() {
 					>
 						回答
 					</button>
-				)}
-			</div>
+				</div>
+			)}
 			{correctIdentity && (
 				<div className="overflow-x-auto">
 					<table className="table">
@@ -197,9 +221,7 @@ function RouteComponent() {
 								// key用の定数を用意しておき、indexでそれらの値を指定する
 								<tr key={SKILL_SLOTS[index]}>
 									<th scope="row">
-										{isAnswerHidden
-											? `スキル${index + 1}`
-											: `${correctIdentity.skills[index].name} (スキル${index + 1})`}
+										{`スキル${index + 1}${isAnswerHidden ? "" : `: ${correctIdentity.skills[index].name}`}`}
 									</th>
 									<td>
 										{isAnswerHidden
