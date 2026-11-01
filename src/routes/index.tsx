@@ -44,6 +44,9 @@ function RouteComponent() {
 	const [hints, setHints] =
 		useState<[SkillHint, SkillHint, SkillHint]>(INITIAL_HINTS);
 
+	// すでに回答した Identity は候補から除外する（同じ個体を無駄に選び直せないようにする）
+	const [guessedIds, setGuessedIds] = useState<string[]>([]);
+
 	const [selectedParams, setSelectedParams] = useState<{
 		character: string;
 		identityId: string | null;
@@ -61,6 +64,7 @@ function RouteComponent() {
 		return identities.filter((identity) => {
 			// 確定済みヒント（非null）と矛盾しない候補だけ残す（未確定の属性は制約にしない）
 			return (
+				!guessedIds.includes(identity.id) &&
 				identity.name.endsWith(selectedParams.character) &&
 				identity.skills.every((skill, index) => {
 					const hint = hints[index];
@@ -72,7 +76,7 @@ function RouteComponent() {
 				})
 			);
 		});
-	}, [identities, hints, selectedParams.character]);
+	}, [identities, hints, guessedIds, selectedParams.character]);
 
 	const [correctIdentity, setCorrectIdentity] = useState<Identity | null>(
 		selectCorrectIdentity(identities),
@@ -87,6 +91,7 @@ function RouteComponent() {
 	const reset = () => {
 		setCorrectIdentity(selectCorrectIdentity(identities));
 		setHints(INITIAL_HINTS);
+		setGuessedIds([]);
 		setSelectedParams({ character: CHARACTERS[0], identityId: null });
 		setCount(3);
 		setIsCleared(false);
@@ -102,12 +107,16 @@ function RouteComponent() {
 				currentHints: hints,
 			}),
 		);
+		setGuessedIds((prev) => [...prev, selectedIdentity.id]);
 
 		if (selectedIdentity.id === correctIdentity.id) {
 			setIsCleared(true);
 			alert("正解です！");
 			return;
 		}
+
+		// 回答した個体は候補から消えるので、選択状態もリセットする
+		setSelectedParams((prev) => ({ ...prev, identityId: null }));
 
 		const nextCount = count - 1;
 		setCount(nextCount);
@@ -213,6 +222,17 @@ function RouteComponent() {
 					</table>
 				</div>
 			)}
+			<div>
+				<p>回答履歴</p>
+				<div className="flex gap-2">
+					{guessedIds.map((id) => {
+						const guessedIdentity = identities.find(
+							(identity) => identity.id === id,
+						);
+						return <span key={id}>{guessedIdentity?.name}</span>;
+					})}
+				</div>
+			</div>
 		</div>
 	);
 }
