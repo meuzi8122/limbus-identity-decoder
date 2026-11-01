@@ -153,7 +153,7 @@ function RouteComponent() {
 
 	return (
 		<div className="container mx-auto flex flex-col space-y-3 items-center p-5">
-			<p className="text-lg font-bold">{`${isGameOver ? `正解: ${correctIdentity?.name}` : `残り回答回数: ${count}`}`}</p>
+			<p className="text-lg font-bold">{`${isGameOver ? `正解: ${correctIdentity?.name}` : `残り解答回数: ${count}`}`}</p>
 			{isGameOver ? (
 				<button type="button" className="btn btn-primary" onClick={reset}>
 					もう一度プレイ
