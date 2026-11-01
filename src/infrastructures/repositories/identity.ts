@@ -27,24 +27,26 @@ function createIdentityRepository(db: DbClient): IdentityRepository {
 			return records.map((record) => ({
 				id: record.id,
 				name: record.name,
-				skill1: {
-					name: record.skill_1_name,
-					sinType: record.skill_1_sin_type,
-					type: record.skill_1_type,
-					coins: record.skill_1_coins,
-				},
-				skill2: {
-					name: record.skill_2_name,
-					sinType: record.skill_2_sin_type,
-					type: record.skill_2_type,
-					coins: record.skill_2_coins,
-				},
-				skill3: {
-					name: record.skill_3_name,
-					sinType: record.skill_3_sin_type,
-					type: record.skill_3_type,
-					coins: record.skill_3_coins,
-				},
+				skills: [
+					{
+						name: record.skill_1_name,
+						sinType: record.skill_1_sin_type,
+						type: record.skill_1_type,
+						coins: record.skill_1_coins,
+					},
+					{
+						name: record.skill_2_name,
+						sinType: record.skill_2_sin_type,
+						type: record.skill_2_type,
+						coins: record.skill_2_coins,
+					},
+					{
+						name: record.skill_3_name,
+						sinType: record.skill_3_sin_type,
+						type: record.skill_3_type,
+						coins: record.skill_3_coins,
+					},
+				],
 			}));
 		},
 	};
