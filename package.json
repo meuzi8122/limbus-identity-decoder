@@ -22,6 +22,7 @@
     "@tanstack/react-router-devtools": "1.167.2",
     "@tanstack/react-start": "1.169.4",
     "microcms-js-sdk": "^3.6.0",
+    "motion": "^14.9.0",
     "nitro": "3.0.260610-beta",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

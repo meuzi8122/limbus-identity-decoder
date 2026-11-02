@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import {
 	checkSkills,
@@ -37,6 +38,29 @@ const CHARACTERS = [
 	"ウーティス",
 	"グレゴール",
 ];
+
+// 判明したヒントのセルだけアニメーションさせる
+// value が null（未判明）の間は "-" を静的に表示し、判明値に変わったタイミングで
+// key が変わることで motion.span が再マウントされてアニメーションが走る
+function HintCell({ value }: { value: string | number | null }) {
+	return (
+		<td>
+			{value === null ? (
+				"-"
+			) : (
+				<motion.span
+					key={String(value)}
+					className="inline-block"
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.5 }}
+				>
+					{value}
+				</motion.span>
+			)}
+		</td>
+	);
+}
 
 // キャラ名以外の条件（未回答 かつ 確定済みヒントと矛盾しない）で候補になり得るか判定する
 function isCandidate(
@@ -245,23 +269,39 @@ function RouteComponent() {
 								// key用の定数を用意しておき、indexでそれらの値を指定する
 								<tr key={SKILL_SLOTS[index]}>
 									<th scope="row">
-										{`スキル${index + 1}${isAnswerHidden ? "" : `: ${correctIdentity.skills[index].name}`}`}
+										{`スキル${index + 1}`}
+										{!isAnswerHidden && (
+											<motion.span
+												className="inline-block"
+												initial={{ opacity: 0, y: 20 }}
+												animate={{ opacity: 1, y: 0 }}
+												transition={{ duration: 0.5 }}
+											>
+												{`: ${correctIdentity.skills[index].name}`}
+											</motion.span>
+										)}
 									</th>
-									<td>
-										{isAnswerHidden
-											? (hint.sinType ?? "-")
-											: correctIdentity.skills[index].sinType}
-									</td>
-									<td>
-										{isAnswerHidden
-											? (hint.type ?? "-")
-											: correctIdentity.skills[index].type}
-									</td>
-									<td>
-										{isAnswerHidden
-											? (hint.coins ?? "-")
-											: correctIdentity.skills[index].coins}
-									</td>
+									<HintCell
+										value={
+											isAnswerHidden
+												? hint.sinType
+												: correctIdentity.skills[index].sinType
+										}
+									/>
+									<HintCell
+										value={
+											isAnswerHidden
+												? hint.type
+												: correctIdentity.skills[index].type
+										}
+									/>
+									<HintCell
+										value={
+											isAnswerHidden
+												? hint.coins
+												: correctIdentity.skills[index].coins
+										}
+									/>
 								</tr>
 							))}
 						</tbody>
