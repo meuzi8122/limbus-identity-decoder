@@ -4,11 +4,8 @@ export function Navbar() {
 	return (
 		<div className="navbar bg-neutral text-neutral-content">
 			<div className="flex-1">
-				<Link
-					to="/"
-					className="px-2 text-xl font-bold text-neutral-content"
-				>
-					Limbus Identity Decoder
+				<Link to="/" className="px-2 text-xl font-bold text-neutral-content">
+					リンバス人格当て
 				</Link>
 			</div>
 			<div className="flex-none">
